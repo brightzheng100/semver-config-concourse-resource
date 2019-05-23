@@ -1,0 +1,161 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+# 0 - stdin
+# 1 - stdout
+# 2 - stderr
+# 3 - for script output
+exec 3>&1
+exec 1>&2   # send stdout to stderr for logging
+
+echo "in starts..."
+
+script_folder=`dirname "$0"`
+source $script_folder/tools/common.sh
+
+# inputs
+request="$TMPDIR/semver-config-request"
+cat > "$request" <&0
+
+destination="$1"
+cd $destination
+
+
+# source items
+DRIVER="$(jq -r '.source.driver // empty' < "${request}")"
+URI="$(jq -r '.source.uri // empty' < "${request}")"
+BRANCH="$(jq -r '.source.branch // "master"' < "${request}")"
+PRIVATE_KEY="$(jq -r '.source.private_key // empty' < "${request}")"
+USERNAME="$(jq -r '.source.username // empty' < "${request}")"
+PASSWORD="$(jq -r '.source.password // empty' < "${request}")"
+CONFIG_FILE="$(jq -r '.source.config_file // empty' < "${request}")"
+CONFIG_PATH="$(jq -r '.source.config_path // empty' < "${request}")"
+INITIAL_VERSION="$(jq -r '.source.initial_version // "0.0.0"' < "${request}")"
+VERSION_PATH="$(jq -r '.source.version_path // empty' < "${request}")"
+VERSION_PATTERN="$(jq -r '.source.version_pattern // empty' < "${request}")"
+
+# params
+FILENAME="$(jq -r '.params.filename // "semver-config"' < "${request}")"
+FORMAT="$(jq -r '.params.format // "yaml"' < "${request}")"
+
+# inputs
+echo "--------------------"
+echo "driver: $DRIVER"
+echo "uri: $URI"
+echo "branch: $BRANCH"
+if [ -z "$PRIVATE_KEY" ]; then
+    echo "private_key: "
+else
+    echo "private_key: ****"
+fi
+if [ -z "$USERNAME" ]; then
+    echo "username: "
+else
+    echo "username: ****"
+fi
+if [ -z "$PASSWORD" ]; then
+    echo "password: "
+else
+    echo "password: ****"
+fi
+echo "config_file: $CONFIG_FILE"
+echo "initial_version: $INITIAL_VERSION"
+echo "config_path: $CONFIG_PATH"
+echo "version_path: $VERSION_PATH"
+echo "version_pattern: $VERSION_PATTERN"
+echo "filename: $FILENAME"
+echo "format: $FORMAT"
+echo "--------------------"
+msg=$(verify "format" "$FORMAT" "yaml" "json")
+if [ ! -z "$msg" ]; then
+    echo -e $msg
+    exit 1
+fi
+
+# setup auth
+# git private key, if any
+if [ ! -z "$PRIVATE_KEY" ]; then
+    git_private_key="$TMPDIR/git_private_key"
+    echo "${PRIVATE_KEY}" > $git_private_key
+    #export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i \"${git_private_key}\""
+    setup_ssh_key $git_private_key false
+    echo "git private key is set"
+fi
+# username/password
+if [ ! -z "$USERNAME" ] && [ ! -z "$PASSWORD" ]; then
+    cat > ~/.netrc <<EOF
+default login ${USERNAME} password ${PASSWORD}
+EOF
+
+    chmod 0600 ~/.netrc
+    echo "username/password is set"
+fi
+
+
+# setup repo
+REPO_DIR="${TMPDIR}/semver-config-git-repo"
+if [ -d "${REPO_DIR}" ]; then
+    echo "pushd "${REPO_DIR}" && git fetch origin "${BRANCH}" && popd"
+    pushd "${REPO_DIR}" && git fetch origin "${BRANCH}" && popd
+else
+    echo git clone "${URI}" --branch "${BRANCH}" --depth 1 "${REPO_DIR}"
+    git clone "${URI}" --branch "${BRANCH}" --depth 1 "${REPO_DIR}"
+fi
+pushd "${REPO_DIR}" && git reset --hard origin/"${BRANCH}" && popd
+
+
+# process version & config
+config_file="${REPO_DIR}/${CONFIG_FILE}"
+if [ ! -f "${config_file}" ]; then
+    echo "config file doesn't exist: ${config_file}"
+    exit 2
+fi
+
+echo "yq r "${config_file}" "${VERSION_PATH}" "
+current_version="$(yq r "${config_file}" "${VERSION_PATH}")"
+echo "current version: ${current_version}"
+if [[ $current_version == "null" ]]; then
+    echo "version is invalid or version_path is wrong"
+    exit 3;
+fi
+
+REQUESTING_VERSION="$(jq -r '.version.semver // empty' < "${request}")"
+echo "requesting version: ${REQUESTING_VERSION}"
+
+
+# result
+# 
+# metadata:
+# {
+#   "version": { "semvar": "1.0.1" },
+#   "metadata": [
+#     { "name": "config-1", "value": "value-1" },
+#     { "name": "config-2", "value": "value-2" }
+#   ]
+# }
+result="{\"version\":{\"semvar\":\"$REQUESTING_VERSION\"},\"metadata\":"
+if [ ! -z "${REQUESTING_VERSION}" ] && [ "${REQUESTING_VERSION}" == "${current_version}" ]; then
+
+    config_items="$(yq r "${config_file}" "${CONFIG_PATH}" -j)"
+
+    if [[ $FORMAT == "json" ]]; then
+        echo "yq r "${config_file}" "${CONFIG_PATH}" -j > $destination/semver-config.json"
+        yq r "${config_file}" "${CONFIG_PATH}" -j > $destination/$FILENAME.json
+    else
+        echo "yq r "${config_file}" "${CONFIG_PATH}" > $destination/semver-config.yaml"
+        yq r "${config_file}" "${CONFIG_PATH}" > $destination/$FILENAME.yaml
+    fi
+
+    if [ ! -z "${config_items}" ]; then
+        result+="$( echo "${config_items}" | jq -c 'to_entries | map({name: .key, value: .value })' )"
+        result+="}"
+    fi
+else
+    result+="[]}"
+fi
+echo "${result}"
+
+
+echo "in completed"
+echo "$result" | jq -s add  >&3

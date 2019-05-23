@@ -1,0 +1,22 @@
+---
+
+# Note: this config file is trying to comply the format required for product download task in platform automation
+# Ref: http://docs.pivotal.io/platform-automation/v2.2/reference/inputs-outputs.html#download-product-config
+
+elastic-runtime:
+  product-version: "2.3.4"
+  pivnet-product-slug: elastic-runtime
+  #pivnet-product-name: cf
+  pivnet-api-token: ((pivnet_token))
+  pivnet-file-glob: "*.pivotal"
+  #product-version-regex: ^2\.3\..*$
+  stemcell-iaas: google   # vsphere; vcloud; openstack; google; azure; aws
+
+pivotal-container-service:
+  product-version: "1.4.0"
+  pivnet-product-slug: pivotal-container-service
+  #pivnet-product-name: pivotal-container-service
+  pivnet-api-token: ((pivnet_token))
+  pivnet-file-glob: "*.pivotal"
+  #product-version-regex: ^2\.3\..*$
+  stemcell-iaas: google   # vsphere; vcloud; openstack; google; azure; aws

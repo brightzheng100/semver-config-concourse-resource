@@ -1,0 +1,20 @@
+---
+elastic-runtime:
+  version: "2.3.4"
+  slug: elastic-runtime
+  name: cf
+  globs: "*.pivotal"
+  stemcell:
+    product_slug: stemcells-ubuntu-xenial
+    product_version: "97.82"
+    product_globs: light-bosh-stemcell-*-google-*.tgz
+
+pivotal-container-service:
+  version: "1.4.0"
+  slug: pivotal-container-service
+  name: pivotal-container-service
+  globs: "*.pivotal"
+  stemcell:
+    product_slug: stemcells-ubuntu-xenial
+    product_version: "97.42"
+    product_globs: light-bosh-stemcell-*-google-*.tgz

@@ -1,0 +1,12 @@
+---
+elastic-runtime:
+  version: "2.3.4"
+  slug: elastic-runtime
+  name: cf
+  globs: "*.pivotal"
+
+pivotal-container-service:
+  version: "1.4.0"
+  slug: pivotal-container-service
+  name: pivotal-container-service
+  globs: "*.pivotal"

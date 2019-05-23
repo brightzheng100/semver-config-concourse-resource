@@ -1,0 +1,66 @@
+---
+resource_types:
+  - name: semver-config
+    type: docker-image
+    source:
+      repository: itstarting/semver-config-concourse-resource
+
+resources:
+- name: config
+  type: semver-config
+  source:
+    driver: git
+    uri: https://github.com/brightzheng100/semver-config-concourse-resource.git
+    branch: master
+    config_file: examples/version-with-product-config.yaml
+    initial_version: 1.0.0                          # optional, defaults to 0.0.0 if not set
+    config_path: "elastic-runtime"                  # [yq](https://github.com/mikefarah/yq)-style path
+    version_path: "elastic-runtime.product-version" # [yq](https://github.com/mikefarah/yq)-style path
+    version_pattern: "m.n.*"
+
+jobs:
+- name: semver-config-job1
+  plan:
+  - get: config
+    params:
+      format: yaml     # Optional. Supported formats: `yaml`, `json`. Defaults to `yaml`
+    trigger: true
+  - task: cat-the-file
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: busybox}
+      inputs:
+      - name: config
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            ls -ls .
+            cat config/semver-config.yaml
+- name: semver-config-job2
+  plan:
+  - get: config
+    params:
+      format: yaml     # Optional. Supported formats: `yaml`, `json`. Defaults to `yaml`
+    passed:
+    - semver-config-job1
+    trigger: true
+  - task: cat-the-file-again
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: busybox}
+      inputs:
+      - name: config
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            ls -ls .
+            cat config/semver-config.yaml
+            sleep 10
