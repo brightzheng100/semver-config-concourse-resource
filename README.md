@@ -66,20 +66,12 @@ Where you have not only the semver, but also a set of config items.
 
 ### `check`: Check for new versions based on desired Semver Pattern
 
-The configured `git` repository is cloned to temporary folder and check whether there is a newer version based on:
-
-- `config_file`
-- `initial_version`
-- `version_path`
-- `version_pattern`
+The tracking `git` repository is cloned to temporary folder and check whether there is a desired newer version based on configured `config_file`, `initial_version`, `version_path`, `version_pattern`.
 
 
 ### `in`: Get the config items of the desired version
 
-The configured `git` repository is cloned to temporary folder and extract the desired config elements based on:
-
-- `config_file`
-- `config_path`
+The tracking `git` repository is cloned to temporary folder and extract the desired config elements based on `config_file`, `config_path`.
 
 A file will be generated as the output which can be customized further by `in` parameters, as below. 
 
