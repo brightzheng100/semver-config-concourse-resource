@@ -7,7 +7,7 @@ Major features:
 
 - One `yaml` file to maintain a set of sementic version-based config items
 - Each config can have arbitrory structure where simply setting `version_path` to detect new versions and `config_path` to locate desired config elements
-- Support some useful semantic version detection patterns. For example, `m.n.*` means `I care only Major or Minor version change`
+- Support some useful semantic [version detection patterns](#version_patterns). For example, `m.n.*` means `I care only Major or Minor version change`
 
 
 ## The Config File Example
@@ -62,19 +62,21 @@ Where you have not only the semver, but also a set of config items.
 - `version_path`: Required. The [yq](https://github.com/mikefarah/yq)-style path, e.g. `root.version` to locate the root of semver item
 - `version_pattern`: Required. The pattern to be used for how to detect new versions. Refer to [Version Patterns](#version_patterns) for the supported patterns
 
+
 ## Behavior / Interfaces
 
 ### `check`: Check for new versions based on desired Semver Pattern
 
 The tracking `git` repository is cloned to temporary folder and check whether there is a desired newer version based on configured `config_file`, `initial_version`, `version_path`, `version_pattern`.
 
-The extracted config elements will become resource' metadata.
+The extracted config elements will become resource's metadata.
+
 
 ### `in`: Get the config items of the desired version
 
 The tracking `git` repository is cloned to temporary folder and extract the desired config elements based on `config_file`, `config_path`.
 
-The extracted config elements will become resource' metadata and a file will be generated as the output which can be customized further by `in` parameters, as below. 
+The extracted config elements will become resource's metadata and a file will be generated as the output which can be customized further by `in` parameters, as below. 
 
 #### Parameters
 
@@ -110,7 +112,7 @@ resources:
     initial_version: 1.0.0                          # optional, defaults to 0.0.0 if not set
     config_path: "elastic-runtime"                  # [yq](https://github.com/mikefarah/yq)-style path
     version_path: "elastic-runtime.product-version" # [yq](https://github.com/mikefarah/yq)-style path
-    version_pattern: "m.n.*"                        # refer to [Version Patterns](#version_patterns) for how to detect new versions
+    version_pattern: "m.n.*"                        # refer to Version Patterns for how to detect new versions
 ```
 
 ```yaml
