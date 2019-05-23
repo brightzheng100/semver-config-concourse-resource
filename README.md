@@ -68,12 +68,13 @@ Where you have not only the semver, but also a set of config items.
 
 The tracking `git` repository is cloned to temporary folder and check whether there is a desired newer version based on configured `config_file`, `initial_version`, `version_path`, `version_pattern`.
 
+The extracted config elements will become resource' metadata.
 
 ### `in`: Get the config items of the desired version
 
 The tracking `git` repository is cloned to temporary folder and extract the desired config elements based on `config_file`, `config_path`.
 
-A file will be generated as the output which can be customized further by `in` parameters, as below. 
+The extracted config elements will become resource' metadata and a file will be generated as the output which can be customized further by `in` parameters, as below. 
 
 #### Parameters
 
@@ -81,7 +82,7 @@ A file will be generated as the output which can be customized further by `in` p
 - `format`: Optional. Supported formats are: `json` and `yaml`. Defaults to `yaml`.
 
 
-### out
+### `out`: No-ops
 
 No-ops for `out`.
 
