@@ -7,7 +7,7 @@ Major features:
 
 - One `yaml` file to maintain a set of sementic version-based config items
 - Each config can have arbitrory structure where simply setting `version_path` to detect new versions and `config_path` to locate desired config elements
-- Support some useful semantic [version detection patterns](#version_patterns). For example, `m.n.*` means `I care only Major or Minor version change`
+- Support some useful semantic [version detection patterns](#version-patterns). For example, `m.n.*` means `I care only Major or Minor version change`
 
 
 ## The Config File Example
