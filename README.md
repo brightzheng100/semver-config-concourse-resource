@@ -50,17 +50,17 @@ Where you have not only the semver, but also a set of config items.
 
 ## Source Configuration
 
-- `driver`: Required. Currently only supports `git`
-- `uri`: Required. The location of the `git` repository
+- **`driver`**: Required. Currently only supports `git`
+- **`uri`**: Required. The location of the `git` repository
 - `branch`: Optional. The branch to track. Defaults to `master` if not set
 - `private_key`: Optional. The SSH private key that can be used for Git access authentication, if required.
 - `username`: Optional. The username that can be used for Git access authentication, if required.
 - `password`: Optional. The password that can be used for Git access authentication, together with `username`, if required.
-- `config_file`: Required. The relative path of the config file
-- `config_path`: Required. The [yq](https://github.com/mikefarah/yq)-style path, e.g. `x.y.z` to locate the root of config items
+- **`config_file`**: Required. The relative path of the config file
+- **`config_path`**: Required. The [yq](https://github.com/mikefarah/yq)-style path, e.g. `x.y.z` to locate the root of config items
 - `initial_version`: Optional. The initial version to start with. Defaults to `0.0.0` if not set
-- `version_path`: Required. The [yq](https://github.com/mikefarah/yq)-style path, e.g. `root.version` to locate the root of semver item
-- `version_pattern`: Required. The pattern to be used for how to detect new versions. Refer to [Version Patterns](#version_patterns) for the supported patterns
+- **`version_path`**: Required. The [yq](https://github.com/mikefarah/yq)-style path, e.g. `root.version` to locate the root of semver item
+- **`version_pattern`**: Required. The pattern to be used for how to detect new versions. Refer to [Version Patterns](#version_patterns) for the supported patterns
 
 
 ## Behavior / Interfaces
@@ -91,7 +91,7 @@ No-ops for `out`.
 
 ## Usage & Examples
 
-Some pipeline examples are provided in [/examples](examples/)
+Some pipeline examples are provided in [/pipelines](pipelines/).
 
 ```yaml
 # pipelines/product-config.yaml
@@ -116,11 +116,14 @@ resources:
 ```
 
 ```yaml
-plan:
-- get: config
-  params:
-    root_path: "product-1"              # [yq](https://github.com/mikefarah/yq)-style path, required to locate the config element
-    version_path: "product-1.version"   # [yq](https://github.com/mikefarah/yq)-style path, required to make it version-aware
+jobs:
+- name: job1
+  plan:
+  - get: config
+    params:
+      format: yaml     # Optional. Supported formats: `yaml`, `json`. Defaults to `yaml`
+    trigger: true
+  ...
 ```
 
 
@@ -141,6 +144,7 @@ There are some version detection patterns supported:
 
 - [yq](https://github.com/mikefarah/yq): v2.3.0 is tested; other versions may also work
 - [jq](https://stedolan.github.io/jq/): v1.5 is tested; other versions may also work
+- [Bats](https://github.com/bats-core/bats-core)
 - Git client
 - Bash
 
