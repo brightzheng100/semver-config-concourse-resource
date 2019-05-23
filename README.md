@@ -137,7 +137,7 @@ There are some version detection patterns supported:
 
 ## Development
 
-Prerequisites:
+### Prerequisites
 
 - [yq](https://github.com/mikefarah/yq): v2.3.0 is tested; other versions may also work
 - [jq](https://stedolan.github.io/jq/): v1.5 is tested; other versions may also work

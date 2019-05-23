@@ -6,11 +6,12 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
 function setup() {
+  mkdir -p /tmp/semver-config-git-repo
   rm -f ~/.netrc
 }
 
 function teardown() {
-  rm -f /tmp/semver-config-request.*
+  rm -rf /tmp/semver-config-git-repo
 }
 
 

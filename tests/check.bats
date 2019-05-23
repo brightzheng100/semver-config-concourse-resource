@@ -6,11 +6,12 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
 function setup() {
+  mkdir -p /tmp/semver-config-git-repo
   rm -f ~/.netrc
 }
 
 function teardown() {
-  rm -f /tmp/semver-config-request.*
+  rm -rf /tmp/semver-config-git-repo
 }
 
 
@@ -25,13 +26,18 @@ PRIVATE_KEY="$PRIVATE_KEY"
 CONFIG_FILE=examples/version-with-config.yaml
 CONFIG_PATH="elastic-runtime"
 VERSION_PATH="elastic-runtime.version"
+VERSION_PATTERN_M__="m.*.*"
+VERSION_PATTERN_MN_="m.n.*"
+VERSION_PATTERN_MNP="m.n.p"
+VERSION_PATTERN__N_="*.n.*"
+VERSION_PATTERN___P="*.*.p"
 INITIAL_VERSION="2.3.4"
 
 ####################################
 
 @test "check test: no source parameters are set" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
         },
@@ -50,7 +56,7 @@ EOF
 
 @test "check test: all source parameters are set as empty" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"\",
@@ -79,7 +85,7 @@ EOF
 
 @test "check test: only driver is set" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\"
@@ -98,7 +104,7 @@ EOF
 
 @test "check test: wrong config_file is set" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -110,7 +116,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"$INITIAL_VERSION\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"$VERSION_PATERN_MNP\"
+          \"version_pattern\": \"$VERSION_PATTERN_MNP\"
         },
         \"version\": {}
       }
@@ -122,7 +128,7 @@ EOF
 
 @test "check test: wrong version_path is set" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -134,7 +140,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"$INITIAL_VERSION\",
           \"version_path\": \"wrong.version.path\",
-          \"version_pattern\": \"$VERSION_PATERN_MNP\"
+          \"version_pattern\": \"$VERSION_PATTERN_MNP\"
         },
         \"version\": {}
       }
@@ -146,7 +152,7 @@ EOF
 
 @test "check test: wrong config_path is set, but it's okay in 'check'" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -158,7 +164,7 @@ EOF
           \"config_path\": \"wrong.path\",
           \"initial_version\": \"$INITIAL_VERSION\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"$VERSION_PATERN_MNP\"
+          \"version_pattern\": \"$VERSION_PATTERN_MNP\"
         },
         \"version\": {}
       }
@@ -170,7 +176,7 @@ EOF
 
 @test "check test: wrong version_pattern is set" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -194,7 +200,7 @@ EOF
 
 @test "check test: NEW version is detected: version_pattern='m.n.p'; current=2.3.4; initial_version=1.2.3" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -206,7 +212,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"1.2.3\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"m.n.p\"
+          \"version_pattern\": \"$VERSION_PATTERN_MNP\"
         },
         \"version\": {}
       }
@@ -219,7 +225,7 @@ EOF
 
 @test "check test: NEW version is detected: version_pattern='m.*.*'; current=2.3.4; initial_version=1.0.0" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -231,7 +237,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"1.0.0\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"m.n.*\"
+          \"version_pattern\": \"$VERSION_PATTERN_MN_\"
         },
         \"version\": {}
       }
@@ -244,7 +250,7 @@ EOF
 
 @test "check test: NEW version is detected: version_pattern='m.n.*'; current=2.3.4; initial_version=2.0.0" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -256,7 +262,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"2.0.0\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"m.n.*\"
+          \"version_pattern\": \"$VERSION_PATTERN_MN_\"
         },
         \"version\": {}
       }
@@ -269,7 +275,7 @@ EOF
 
 @test "check test: NEW version is detected: version_pattern='m.n.p'; current=2.3.4; initial_version=2.3.0" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -281,7 +287,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"2.3.0\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"m.n.p\"
+          \"version_pattern\": \"$VERSION_PATTERN_MNP\"
         },
         \"version\": {}
       }
@@ -294,7 +300,7 @@ EOF
 
 @test "check test: NO version is detected: version_pattern='m.*.*'; current=2.3.4; initial_version=2.0.0" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -306,7 +312,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"2.0.0\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"m.*.*\"
+          \"version_pattern\": \"$VERSION_PATTERN_M__\"
         },
         \"version\": {}
       }
@@ -319,7 +325,7 @@ EOF
 
 @test "check test: NO version is detected: version_pattern='m.n.*'; current=2.3.4; initial_version=2.3.0" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -331,7 +337,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"2.3.0\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"m.n.*\"
+          \"version_pattern\": \"$VERSION_PATTERN_MN_\"
         },
         \"version\": {}
       }
@@ -344,7 +350,7 @@ EOF
 
 @test "check test: NO version is detected: version_pattern='*.n.*'; current=2.3.4; initial_version=1.3.0" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -356,7 +362,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"1.3.0\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"*.n.*\"
+          \"version_pattern\": \"$VERSION_PATTERN__N_\"
         },
         \"version\": {}
       }
@@ -369,7 +375,7 @@ EOF
 
 @test "check test: NO version is detected: version_pattern='*.*.p'; current=2.3.4; initial_version=2.2.2" {
   run bash -c "
-    cat <<- EOF | ./check
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
         \"source\": {
           \"driver\": \"$DRIVER\",
@@ -381,7 +387,7 @@ EOF
           \"config_path\": \"$CONFIG_PATH\",
           \"initial_version\": \"2.2.2\",
           \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"*.*.p\"
+          \"version_pattern\": \"$VERSION_PATTERN___P\"
         },
         \"version\": {}
       }
