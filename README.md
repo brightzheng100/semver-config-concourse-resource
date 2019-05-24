@@ -12,7 +12,7 @@ Major features:
 
 ## The Config File Example
 
-The config file can be any sensibble yaml format.
+The config file can be any sensible yaml format.
 
 The simlest one might be:
 
@@ -69,8 +69,9 @@ Where you have not only the semver, but also a set of config items.
 
 The tracking `git` repository is cloned to temporary folder and check whether there is a desired newer version based on configured `config_file`, `initial_version`, `version_path`, `version_pattern`.
 
-The extracted config elements will become resource's metadata.
+The extracted config elements will become resource's metadata, so please use integrated credential manager to handle credentials properly.
 
+![metadata.png](misc/metadata.png)
 
 ### `in`: Get the config items of the desired version
 
