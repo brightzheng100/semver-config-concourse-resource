@@ -121,7 +121,7 @@ if [[ $current_version == "null" ]]; then
 fi
 
 REQUESTING_VERSION="$(jq -r '.version.semver // empty' < "${request}")"
-echo "requesting version: ${REQUESTING_VERSION}"
+echo "requesting version: $REQUESTING_VERSION"
 
 
 # result

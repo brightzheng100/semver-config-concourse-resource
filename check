@@ -36,6 +36,8 @@ INITIAL_VERSION="$(jq -r '.source.initial_version // "0.0.0"' < "${request}")"
 VERSION_PATH="$(jq -r '.source.version_path // empty' < "${request}")"
 VERSION_PATTERN="$(jq -r '.source.version_pattern // empty' < "${request}")"
 
+# current semver while continously checking
+REQUESTING_VERSION="$(jq -r '.version.semver // empty' < "${request}")"
 
 # verify inputs
 echo "--------------------"
@@ -62,6 +64,7 @@ echo "initial_version: $INITIAL_VERSION"
 echo "config_path: $CONFIG_PATH"
 echo "version_path: $VERSION_PATH"
 echo "version_pattern: $VERSION_PATTERN"
+echo "requesting version: $REQUESTING_VERSION"
 echo "--------------------"
 msg=$(verify "driver" "$DRIVER" "git")
 msg+=$(verify "uri" "$URI")
@@ -128,20 +131,24 @@ fi
 # [
 #   { "semver": "1.0.1" }
 # ]
+base_version=$INITIAL_VERSION
+if ! [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]]; then
+    base_version="$REQUESTING_VERSION"
+fi
 major=""
 if [[ $VERSION_PATTERN == *"m."* ]]; then
-    major="$( semverDetectMajorChange "${INITIAL_VERSION}" "${current_version}" )"
-    echo "semverDetectMajorChange "${INITIAL_VERSION}" "${current_version}": $major "
+    major="$( semverDetectMajorChange "${base_version}" "${current_version}" )"
+    echo "semverDetectMajorChange "${base_version}" "${current_version}": $major "
 fi
 minor=""
 if [[ $VERSION_PATTERN == *".n."* ]]; then
-    minor="$( semverDetectMinorChange "${INITIAL_VERSION}" "${current_version}" )"
-    echo "semverDetectMinorChange "${INITIAL_VERSION}" "${current_version}": $minor "
+    minor="$( semverDetectMinorChange "${base_version}" "${current_version}" )"
+    echo "semverDetectMinorChange "${base_version}" "${current_version}": $minor "
 fi
 patch=""
 if [[ $VERSION_PATTERN == *".p"* ]]; then
-    patch="$( semverDetectPatchChange "${INITIAL_VERSION}" "${current_version}" )"
-    echo "semverDetectPatchChange "${INITIAL_VERSION}" "${current_version}": $patch "
+    patch="$( semverDetectPatchChange "${base_version}" "${current_version}" )"
+    echo "semverDetectPatchChange "${base_version}" "${current_version}": $patch "
 fi
 
 if [ "${major}" == "true" ] || [ "${minor}" == "true" ] || [ "${patch}" == "true" ]; then
