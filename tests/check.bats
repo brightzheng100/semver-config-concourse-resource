@@ -162,7 +162,6 @@ EOF
           \"password\": \"$PASSWORD\",
           \"config_file\": \"$CONFIG_FILE\",
           \"config_path\": \"wrong.path\",
-          \"initial_version\": \"$INITIAL_VERSION\",
           \"version_path\": \"$VERSION_PATH\",
           \"version_pattern\": \"$VERSION_PATTERN_MNP\"
         },
@@ -171,7 +170,8 @@ EOF
 EOF
   "
   assert_success
-  assert_line --partial "result: []"
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
 }
 
 @test "check test: wrong version_pattern is set" {
@@ -196,6 +196,202 @@ EOF
   "
   assert_failure
   assert_line --partial "version_pattern is not valid"
+}
+
+@test "check test: NEW version is detected: version_pattern='m.n.*'; current=2.3.4; no initial_version and semver=null (first time)" {
+  run bash -c "
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
+      {
+        \"source\": {
+          \"driver\": \"$DRIVER\",
+          \"uri\": \"$URI\",
+          \"branch\": \"$BRANCH\",
+          \"username\": \"$USERNAME\",
+          \"password\": \"$PASSWORD\",
+          \"config_file\": \"$CONFIG_FILE\",
+          \"config_path\": \"$CONFIG_PATH\",
+          \"version_path\": \"$VERSION_PATH\",
+          \"version_pattern\": \"$VERSION_PATTERN_MN_\"
+        },
+        \"version\": {\"semver\": null}
+      }
+EOF
+  "
+  assert_success
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
+}
+
+@test "check test: NEW version is detected: version_pattern='m.n.*'; current=2.3.4; initial_version=1.2.3 and semver=null (first time)" {
+  run bash -c "
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
+      {
+        \"source\": {
+          \"driver\": \"$DRIVER\",
+          \"uri\": \"$URI\",
+          \"branch\": \"$BRANCH\",
+          \"username\": \"$USERNAME\",
+          \"password\": \"$PASSWORD\",
+          \"config_file\": \"$CONFIG_FILE\",
+          \"config_path\": \"$CONFIG_PATH\",
+          \"version_path\": \"$VERSION_PATH\",
+          \"initial_version\": \"1.2.3\",
+          \"version_pattern\": \"$VERSION_PATTERN_MN_\"
+        },
+        \"version\": {\"semver\": null}
+      }
+EOF
+  "
+  assert_success
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
+}
+
+@test "check test: NEW version is detected: version_pattern='*.n.*'; current=2.3.4; no initial_version and semver=null (first time)" {
+  run bash -c "
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
+      {
+        \"source\": {
+          \"driver\": \"$DRIVER\",
+          \"uri\": \"$URI\",
+          \"branch\": \"$BRANCH\",
+          \"username\": \"$USERNAME\",
+          \"password\": \"$PASSWORD\",
+          \"config_file\": \"$CONFIG_FILE\",
+          \"config_path\": \"$CONFIG_PATH\",
+          \"version_path\": \"$VERSION_PATH\",
+          \"version_pattern\": \"$VERSION_PATTERN__N_\"
+        },
+        \"version\": {\"semver\": null}
+      }
+EOF
+  "
+  assert_success
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
+}
+
+@test "check test: NEW version is detected: version_pattern='*.n.*'; current=2.3.4; initial_version=2.2.3 and semver=null (first time)" {
+  run bash -c "
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
+      {
+        \"source\": {
+          \"driver\": \"$DRIVER\",
+          \"uri\": \"$URI\",
+          \"branch\": \"$BRANCH\",
+          \"username\": \"$USERNAME\",
+          \"password\": \"$PASSWORD\",
+          \"config_file\": \"$CONFIG_FILE\",
+          \"config_path\": \"$CONFIG_PATH\",
+          \"version_path\": \"$VERSION_PATH\",
+          \"initial_version\": \"2.2.3\",
+          \"version_pattern\": \"$VERSION_PATTERN__N_\"
+        },
+        \"version\": {\"semver\": null}
+      }
+EOF
+  "
+  assert_success
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
+}
+
+@test "check test: NEW version is detected: version_pattern='*.*.p'; current=2.3.4; no initial_version and semver=null (first time)" {
+  run bash -c "
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
+      {
+        \"source\": {
+          \"driver\": \"$DRIVER\",
+          \"uri\": \"$URI\",
+          \"branch\": \"$BRANCH\",
+          \"username\": \"$USERNAME\",
+          \"password\": \"$PASSWORD\",
+          \"config_file\": \"$CONFIG_FILE\",
+          \"config_path\": \"$CONFIG_PATH\",
+          \"version_path\": \"$VERSION_PATH\",
+          \"version_pattern\": \"$VERSION_PATTERN___P\"
+        },
+        \"version\": {\"semver\": null}
+      }
+EOF
+  "
+  assert_success
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
+}
+
+@test "check test: NEW version is detected: version_pattern='*.*.p'; current=2.3.4; initial_version=2.3.0 and semver=null (first time)" {
+  run bash -c "
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
+      {
+        \"source\": {
+          \"driver\": \"$DRIVER\",
+          \"uri\": \"$URI\",
+          \"branch\": \"$BRANCH\",
+          \"username\": \"$USERNAME\",
+          \"password\": \"$PASSWORD\",
+          \"config_file\": \"$CONFIG_FILE\",
+          \"config_path\": \"$CONFIG_PATH\",
+          \"version_path\": \"$VERSION_PATH\",
+          \"initial_version\": \"2.3.0\",
+          \"version_pattern\": \"$VERSION_PATTERN___P\"
+        },
+        \"version\": {\"semver\": null}
+      }
+EOF
+  "
+  assert_success
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
+}
+
+@test "check test: NEW version is detected: version_pattern='m.n.p'; current=2.3.4; no initial_version and semver=null (first time)" {
+  run bash -c "
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
+      {
+        \"source\": {
+          \"driver\": \"$DRIVER\",
+          \"uri\": \"$URI\",
+          \"branch\": \"$BRANCH\",
+          \"username\": \"$USERNAME\",
+          \"password\": \"$PASSWORD\",
+          \"config_file\": \"$CONFIG_FILE\",
+          \"config_path\": \"$CONFIG_PATH\",
+          \"version_path\": \"$VERSION_PATH\",
+          \"version_pattern\": \"$VERSION_PATTERN_MNP\"
+        },
+        \"version\": {\"semver\": null}
+      }
+EOF
+  "
+  assert_success
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
+}
+
+@test "check test: NEW version is detected: version_pattern='m.n.p'; current=2.3.4; initial_version=1.2.1 and semver=null (first time)" {
+  run bash -c "
+    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
+      {
+        \"source\": {
+          \"driver\": \"$DRIVER\",
+          \"uri\": \"$URI\",
+          \"branch\": \"$BRANCH\",
+          \"username\": \"$USERNAME\",
+          \"password\": \"$PASSWORD\",
+          \"config_file\": \"$CONFIG_FILE\",
+          \"config_path\": \"$CONFIG_PATH\",
+          \"version_path\": \"$VERSION_PATH\",
+          \"initial_version\": \"1.2.3\",
+          \"version_pattern\": \"$VERSION_PATTERN_MNP\"
+        },
+        \"version\": {\"semver\": null}
+      }
+EOF
+  "
+  assert_success
+  assert_line --partial 'new version detected:'
+  assert_line --partial '"semver": "2.3.4"'
 }
 
 @test "check test: NEW version is detected: version_pattern='m.n.p'; current=2.3.4; initial_version=1.2.3" {
@@ -265,30 +461,6 @@ EOF
           \"version_pattern\": \"$VERSION_PATTERN_MN_\"
         },
         \"version\": {}
-      }
-EOF
-  "
-  assert_success
-  assert_line --partial 'new version detected:'
-  assert_line --partial '"semver": "2.3.4"'
-}
-
-@test "check test: NEW version is detected: version_pattern='m.n.*'; current=2.3.4; no initial_version and semver=null (first time)" {
-  run bash -c "
-    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
-      {
-        \"source\": {
-          \"driver\": \"$DRIVER\",
-          \"uri\": \"$URI\",
-          \"branch\": \"$BRANCH\",
-          \"username\": \"$USERNAME\",
-          \"password\": \"$PASSWORD\",
-          \"config_file\": \"$CONFIG_FILE\",
-          \"config_path\": \"$CONFIG_PATH\",
-          \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"$VERSION_PATTERN_MN_\"
-        },
-        \"version\": {\"semver\": null}
       }
 EOF
   "
@@ -445,7 +617,7 @@ EOF
   assert_line --partial 'result: []'
 }
 
-@test "check test: NO version is detected: version_pattern='*.n.*'; current=2.3.4; no initial_version and semver=null (first time)" {
+@test "check test: NO version is detected: version_pattern='*.n.*'; current=2.3.4; no initial_version but semver=1.3.0" {
   run bash -c "
     cat <<- EOF | ./check "/tmp/semver-config-git-repo"
       {
@@ -460,7 +632,7 @@ EOF
           \"version_path\": \"$VERSION_PATH\",
           \"version_pattern\": \"$VERSION_PATTERN__N_\"
         },
-        \"version\": {\"semver\": null}
+        \"version\": {\"semver\": \"1.3.0\"}
       }
 EOF
   "
@@ -486,30 +658,6 @@ EOF
           \"version_pattern\": \"$VERSION_PATTERN___P\"
         },
         \"version\": {}
-      }
-EOF
-  "
-  assert_success
-  assert_line --partial 'no new version detected'
-  assert_line --partial 'result: []'
-}
-
-@test "check test: NO version is detected: version_pattern='*.*.p'; current=2.3.4; no initial_version and semver=null (first time)" {
-  run bash -c "
-    cat <<- EOF | ./check "/tmp/semver-config-git-repo"
-      {
-        \"source\": {
-          \"driver\": \"$DRIVER\",
-          \"uri\": \"$URI\",
-          \"branch\": \"$BRANCH\",
-          \"username\": \"$USERNAME\",
-          \"password\": \"$PASSWORD\",
-          \"config_file\": \"$CONFIG_FILE\",
-          \"config_path\": \"$CONFIG_PATH\",
-          \"version_path\": \"$VERSION_PATH\",
-          \"version_pattern\": \"$VERSION_PATTERN___P\"
-        },
-        \"version\": {\"semver\": null}
       }
 EOF
   "

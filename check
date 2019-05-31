@@ -131,27 +131,33 @@ fi
 # [
 #   { "semver": "1.0.1" }
 # ]
-base_version=$INITIAL_VERSION
-if ! [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]]; then
-    base_version="$REQUESTING_VERSION"
-fi
-major=""
-if [[ $VERSION_PATTERN == *"m."* ]]; then
-    major="$( semverDetectMajorChange "${base_version}" "${current_version}" )"
-    echo "semverDetectMajorChange "${base_version}" "${current_version}": $major "
-fi
-minor=""
-if [[ $VERSION_PATTERN == *".n."* ]]; then
-    minor="$( semverDetectMinorChange "${base_version}" "${current_version}" )"
-    echo "semverDetectMinorChange "${base_version}" "${current_version}": $minor "
-fi
-patch=""
-if [[ $VERSION_PATTERN == *".p"* ]]; then
-    patch="$( semverDetectPatchChange "${base_version}" "${current_version}" )"
-    echo "semverDetectPatchChange "${base_version}" "${current_version}": $patch "
+first_check=""
+if [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]] && [[ "$INITIAL_VERSION" == "0.0.0" ]]; then
+    # first check with no initial_version specified
+    first_check="true"
+else
+    base_version=$INITIAL_VERSION
+    if ! [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]]; then
+        base_version="$REQUESTING_VERSION"
+    fi
+    major=""
+    if [[ $VERSION_PATTERN == *"m."* ]]; then
+        major="$( semverDetectMajorChange "${base_version}" "${current_version}" )"
+        echo "semverDetectMajorChange "${base_version}" "${current_version}": $major "
+    fi
+    minor=""
+    if [[ $VERSION_PATTERN == *".n."* ]]; then
+        minor="$( semverDetectMinorChange "${base_version}" "${current_version}" )"
+        echo "semverDetectMinorChange "${base_version}" "${current_version}": $minor "
+    fi
+    patch=""
+    if [[ $VERSION_PATTERN == *".p"* ]]; then
+        patch="$( semverDetectPatchChange "${base_version}" "${current_version}" )"
+        echo "semverDetectPatchChange "${base_version}" "${current_version}": $patch "
+    fi
 fi
 
-if [ "${major}" == "true" ] || [ "${minor}" == "true" ] || [ "${patch}" == "true" ]; then
+if [ "${first_check}" == "true" ] || [ "${major}" == "true" ] || [ "${minor}" == "true" ] || [ "${patch}" == "true" ]; then
     # new version found
     echo "new version detected: ${current_version}"
     result=$(jq -n "[{semver:\"${current_version}\"}]")
