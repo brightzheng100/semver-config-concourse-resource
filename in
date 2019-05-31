@@ -135,20 +135,20 @@ echo "requesting version: $REQUESTING_VERSION"
 #   ]
 # }
 result="{\"version\":{\"semvar\":\"$REQUESTING_VERSION\"},\"metadata\":"
-if [ ! -z "${REQUESTING_VERSION}" ] && [ "${REQUESTING_VERSION}" == "${current_version}" ]; then
+if [ ! -z "$REQUESTING_VERSION" ] && [ "$REQUESTING_VERSION" == "$current_version" ]; then
 
-    config_items="$(yq r "${config_file}" "${CONFIG_PATH}" -j)"
+    config_items="$( yq r $config_file $CONFIG_PATH -j )"
 
     if [[ $FORMAT == "json" ]]; then
-        echo "yq r "${config_file}" "${CONFIG_PATH}" -j > $destination/semver-config.json"
-        yq r "${config_file}" "${CONFIG_PATH}" -j > $destination/$FILENAME.json
+        echo "echo $config_items > $destination/$FILENAME.json"
+        echo $config_items > $destination/$FILENAME.json
     else
-        echo "yq r "${config_file}" "${CONFIG_PATH}" > $destination/semver-config.yaml"
-        yq r "${config_file}" "${CONFIG_PATH}" > $destination/$FILENAME.yaml
+        echo "yq r "$config_file" "$CONFIG_PATH" > $destination/$FILENAME.yaml"
+        yq r "$config_file" "$CONFIG_PATH" > $destination/$FILENAME.yaml
     fi
 
     if [ ! -z "${config_items}" ]; then
-        result+="$( echo "${config_items}" | jq -c 'to_entries | map({name: .key, value: .value })' )"
+        result+="$( echo $config_items | jq -c 'to_entries | map({name: .key, value: .value })' )"
         result+="}"
     fi
 else
