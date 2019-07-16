@@ -133,7 +133,11 @@ fi
 
 first_check=""
 config_has_changed=""
-current_config_hash="`echo "$( yq r $config_file $CONFIG_PATH )" | md5`"
+md5_cmd="md5"
+if [[ $(uname -s) == "Linux" ]]; then
+    md5_cmd="md5sum"
+fi
+current_config_hash="`echo "$( yq r $config_file $CONFIG_PATH )" | $md5_cmd`"
 echo "current config hash: ${current_config_hash}"
 
 if [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]] && [[ "$INITIAL_VERSION" == "0.0.0" ]]; then
