@@ -7,7 +7,18 @@ Major features:
 
 - One `yaml` file to maintain a set of sementic version-based config items
 - Each config can have arbitrory structure where simply setting `version_path` to detect new versions and `config_path` to locate desired config elements
-- Support some useful semantic [version detection patterns](#version-patterns). For example, `m.n.*` means `I care only Major or Minor version change`
+- Support some useful semantic [version detection patterns](#version-patterns). For example, `m.n.*` means `I care only Major and Minor version changes`; while `*.*.p` means `I care only Patch version changes`
+
+
+## Maintainer
+
+- [Bright Zheng](https://github.com/brightzheng100)
+
+
+## Major Change Logs
+
+- [2019-05-23] Initial release
+- [2019-07-16] Added support for detecting config changes within the same version
 
 
 ## The Config File Example
