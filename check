@@ -126,20 +126,29 @@ if [[ $current_version == "null" ]]; then
     exit 3;
 fi
 
-
 # result
 # [
 #   { "semver": "1.0.1" }
 # ]
+
 first_check=""
+config_has_changed=""
+current_config_hash="`echo "$( yq r $config_file $CONFIG_PATH )" | md5`"
+echo "current config hash: ${current_config_hash}"
+
 if [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]] && [[ "$INITIAL_VERSION" == "0.0.0" ]]; then
     # first check with no initial_version specified
     first_check="true"
+
+    echo "$current_config_hash" > "$TMPDIR/semver-config-hash"
 else
+    # use the initial_version as base by default
     base_version=$INITIAL_VERSION
     if ! [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]]; then
+        # use request_version as base instead if any
         base_version="$REQUESTING_VERSION"
     fi
+
     major=""
     if [[ $VERSION_PATTERN == *"m."* ]]; then
         major="$( semverDetectMajorChange "${base_version}" "${current_version}" )"
@@ -155,9 +164,24 @@ else
         patch="$( semverDetectPatchChange "${base_version}" "${current_version}" )"
         echo "semverDetectPatchChange "${base_version}" "${current_version}": $patch "
     fi
+
+    # only when same versions need to check config change
+    if [[ "${base_version}" == "${current_version}" ]]; then
+        previous_config_hash="`cat $TMPDIR/semver-config-hash`"
+        echo "previous config hash: ${previous_config_hash}"
+        if [[ ! "$current_config_hash" == "$previous_config_hash" ]]; then
+            config_has_changed="true"
+            echo "config_has_changed=true"
+        fi
+    fi
+    echo "$current_config_hash" > "$TMPDIR/semver-config-hash"
 fi
 
-if [ "${first_check}" == "true" ] || [ "${major}" == "true" ] || [ "${minor}" == "true" ] || [ "${patch}" == "true" ]; then
+if [ "${first_check}" == "true" ] \
+    || [ "${major}" == "true" ] \
+    || [ "${minor}" == "true" ] \
+    || [ "${patch}" == "true" ] \
+    || [ "${config_has_changed}" == "true" ]; then
     # new version found
     echo "new version detected: ${current_version}"
     result=$(jq -n "[{semver:\"${current_version}\"}]")
