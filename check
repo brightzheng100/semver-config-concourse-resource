@@ -132,19 +132,19 @@ fi
 # ]
 
 first_check=""
-config_has_changed=""
+
 md5_cmd="md5"
 if [[ $(uname -s) == "Linux" ]]; then
     md5_cmd="md5sum"
 fi
+previous_config_hash=""
 current_config_hash="`echo "$( yq r $config_file $CONFIG_PATH )" | $md5_cmd`"
+config_has_changed=""
 echo "current config hash: ${current_config_hash}"
 
 if [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]] && [[ "$INITIAL_VERSION" == "0.0.0" ]]; then
     # first check with no initial_version specified
     first_check="true"
-
-    echo "$current_config_hash" > "$TMPDIR/semver-config-hash"
 else
     # use the initial_version as base by default
     base_version=$INITIAL_VERSION
@@ -171,15 +171,18 @@ else
 
     # only when same versions need to check config change
     if [[ "${base_version}" == "${current_version}" ]]; then
-        previous_config_hash="`cat $TMPDIR/semver-config-hash`"
+        if [ -f $TMPDIR/semver-config-hash ]; then
+            previous_config_hash="`cat $TMPDIR/semver-config-hash`"
+        fi
         echo "previous config hash: ${previous_config_hash}"
         if [[ ! "$current_config_hash" == "$previous_config_hash" ]]; then
             config_has_changed="true"
             echo "config_has_changed=true"
         fi
     fi
-    echo "$current_config_hash" > "$TMPDIR/semver-config-hash"
 fi
+
+echo "$current_config_hash" > "$TMPDIR/semver-config-hash"
 
 if [ "${first_check}" == "true" ] \
     || [ "${major}" == "true" ] \
