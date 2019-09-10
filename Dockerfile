@@ -2,7 +2,7 @@ FROM alpine:latest
 
 WORKDIR /tmp/build
 
-ENV JQ_URL "https://github.com/mikefarah/yq/releases/download/2.3.0/yq_linux_amd64"
+ENV JQ_URL "https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64"
 
 RUN apk --no-cache add bash curl git openssh jq; \
     curl -L -o /usr/local/bin/yq ${JQ_URL}; \
