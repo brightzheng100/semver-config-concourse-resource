@@ -121,20 +121,21 @@ if [[ $current_version == "null" ]]; then
 fi
 
 REQUESTING_VERSION="$(jq -r '.version.semver // empty' < "${request}")"
+REQUESTING_HASH="$(jq -r '.version.hash // empty' < "${request}")"
 echo "requesting version: $REQUESTING_VERSION"
 
 
-# result
+# result sample
 # 
 # metadata:
 # {
-#   "version": { "semvar": "1.0.1" },
+#   "version": { "semvar": "1.0.1", "hash": "f60924937312a53779becb6fa634b3e0" },
 #   "metadata": [
 #     { "name": "config-1", "value": "value-1" },
 #     { "name": "config-2", "value": "value-2" }
 #   ]
 # }
-result="{\"version\":{\"semvar\":\"$REQUESTING_VERSION\"},\"metadata\":"
+result="{\"version\":{\"semvar\":\"$REQUESTING_VERSION\",\"hash\":\"$REQUESTING_HASH\"},\"metadata\":"
 if [ ! -z "$REQUESTING_VERSION" ] && [ "$REQUESTING_VERSION" == "$current_version" ]; then
 
     config_items="$( yq r $config_file $CONFIG_PATH -j )"

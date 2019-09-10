@@ -9,8 +9,7 @@ elastic-runtime-updated:
   version: "2.3.4"
   slug: elastic-runtime
   name: cf
-  globs: "*.pivotal"
-  new_element: "whatever"
+  globs: "cf-*.pivotal"   # similating a change has been made here
 
 pivotal-container-service:
   version: "1.4.0"

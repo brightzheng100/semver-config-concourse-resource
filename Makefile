@@ -1,13 +1,21 @@
-all: build push
+all: test build push-release
 
 test:
 	bats tests/check.bats && bats tests/in.bats
 
 build:
-	docker build -t itstarting/semver-config-concourse-resource:local .
+	docker build -t itstarting/semver-config-concourse-resource:test .
 
-push:
-	docker tag itstarting/semver-config-concourse-resource:local itstarting/semver-config-concourse-resource:latest
+push-test:
+	docker push itstarting/semver-config-concourse-resource:test
+
+RELASE_VERSION = "1.0.0"
+push-release:
+	docker tag itstarting/semver-config-concourse-resource:test itstarting/semver-config-concourse-resource:$(RELASE_VERSION)
+	docker push itstarting/semver-config-concourse-resource:$(RELASE_VERSION)
+
+push-latest:
+	docker tag itstarting/semver-config-concourse-resource:test itstarting/semver-config-concourse-resource:latest
 	docker push itstarting/semver-config-concourse-resource:latest
 
 fly:

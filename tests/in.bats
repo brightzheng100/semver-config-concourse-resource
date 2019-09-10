@@ -30,7 +30,7 @@ INITIAL_VERSION="2.3.4"
 
 ####################################
 
-@test "in test: desired version is requested" {
+@test "in test: desired version is requested: current=2.3.4; requesting=2.3.4; initial_version=2.3.4" {
   run bash -c "
     cat <<- EOF | ./in "/tmp/semver-config-git-repo"
       {
@@ -59,7 +59,7 @@ EOF
   assert_line --partial '"value": "elastic-runtime"'
 }
 
-@test "in test: desired version is requested; initial_version shouldn't matter" {
+@test "in test: desired version is requested: current=2.3.4; requesting=2.3.4" {
   run bash -c "
     cat <<- EOF | ./in "/tmp/semver-config-git-repo"
       {
