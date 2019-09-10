@@ -21,7 +21,7 @@ Major features:
 - [2019-07-16] Added support for detecting config changes within the same version
 - [2019-09-10] Released v1.0.0: 
   - Fixed the content hash detection issue by adding hash as part of the version identifiers
-  - bump yq to latest v2.4.0
+  - bumped yq to latest v2.4.0
 
 
 ## The Config File Example
