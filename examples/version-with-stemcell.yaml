@@ -1,0 +1,13 @@
+---
+
+xenial-stemcell:
+  product-version: "170.124"
+  pivnet-product-slug: stemcells-ubuntu-xenial
+  pivnet-api-token: ((pivnet_token))
+  pivnet-file-glob: "light-bosh-stemcell-*-google-kvm-ubuntu-xenial-go_agent.tgz"
+
+xenial-stemcell-updated:
+  product-version: "170.124"
+  pivnet-product-slug: stemcells-ubuntu-xenial
+  pivnet-api-token: ((pivnet_token))
+  pivnet-file-glob: "*-google-*.tgz"
