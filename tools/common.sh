@@ -35,7 +35,7 @@ function verify() {
     echo $message && return 0
 }
 
-# m.n.p
+# m.n.p or -
 function verify_version_pattern() {
     p=$1
 
@@ -47,7 +47,8 @@ function verify_version_pattern() {
         [[ "$p" != "m.n.*" ]] &&
         [[ "$p" != "m.n.p" ]] && 
         [[ "$p" != "*.n.*" ]] &&
-        [[ "$p" != "*.*.p" ]]; then
+        [[ "$p" != "*.*.p" ]] &&
+        [[ "$p" != "-" ]]; then
         echo "version_pattern is not valid: $p" && return 0
     fi
 

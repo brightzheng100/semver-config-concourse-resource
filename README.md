@@ -5,8 +5,8 @@ A [Concourse](https://concourse-ci.org) resource for detecting desired semantic 
 
 Major features:
 
-- One `yaml` file to maintain a set of sementic version-based config items
-- Each config can have arbitrory structure where simply setting `version_path` to detect new versions and `config_path` to locate desired config elements
+- One `yaml` file to maintain a set of semantic version-based config items
+- Each config can have arbitrary structure where simply setting `version_path` to detect new versions and `config_path` to locate desired config elements
 - Support some useful semantic [version detection patterns](#version-patterns). For example, `m.n.*` means `I care only Major and Minor version changes`; while `*.*.p` means `I care only Patch version changes`
 
 
@@ -21,14 +21,17 @@ Major features:
 - [2019-07-16] Added support for detecting config changes within the same version
 - [2019-09-10] Released v1.0.0: 
   - Fixed the content hash detection issue by adding hash as part of the version identifiers
-  - bumped yq to latest v2.4.0
+  - Bumped yq to latest v2.4.0
+- [2019-09-24] Released v2.0.0: 
+  - Added new version pattern "`-`" to cover more version-based scenarios, where the version might not be strictly semantic compatible
+  - Refactored the code with more test cases
 
 
 ## The Config File Example
 
 The config file can be any sensible yaml format.
 
-The simlest one might be:
+The simplest one might be:
 
 ```yaml
 # examples/version-only.yaml
@@ -151,14 +154,15 @@ There are some version detection patterns supported:
 - `m.n.p`: Any Major (m), miNor (n), and Patch (p) version change should be detected as a change, e.g. `2.*.*` -> `3.*.*`, `2.1.*` -> `2.2.*`, `2.1.5` -> `2.1.9`
 - `*.n.*`: ONLY miNor (m) version change should be detected as a change, e.g. `2.2.*` -> `2.3.*`
 - `*.*.p`: ONLY Patch (p) version change should be detected as a change, e.g. `2.2.4` -> `2.2.9`
+- `-`: This is a special version pattern, which means `I'm just a version string which may not compatible with semantic versioning, but please detect my changes as well, based on the version string or content hash`
 
 
 ## Development
 
 ### Prerequisites
 
-- [yq](https://github.com/mikefarah/yq): v2.3.0 is tested; other versions may also work
-- [jq](https://stedolan.github.io/jq/): v1.5 is tested; other versions may also work
+- [yq](https://github.com/mikefarah/yq): v2.3.0+ is tested; other versions may also work
+- [jq](https://stedolan.github.io/jq/): v1.5+ is tested; other versions may also work
 - [Bats](https://github.com/bats-core/bats-core)
 - Git client
 - Bash
@@ -181,9 +185,11 @@ So if you want to run the test cases by yourself, do this:
 $ git submodule update --init
 
 $ bats tests/check.bats
+$ bats tests/check-stemcell.bats
 $ bats tests/in.bats
+$ bats tests/in-stemcell.bats
 ```
 
 ## Contributing
 
-Please make all pull requests to the master branch and ensure tests are added to `/tests/check.bats` and/or `/tests/in.bats`.
+Please make all pull requests to the master branch and ensure tests are added to suitable `/tests/*.bats` file(s).

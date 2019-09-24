@@ -133,13 +133,16 @@ fi
 
 first_check=""
 
-md5_cmd="md5"
-if [[ $(uname -s) == "Linux" ]]; then
-    md5_cmd="md5sum"
+md5_cmd="md5sum"
+if [[ $(uname -s) == "Darwin" ]]; then
+    md5_cmd="md5"
 fi
+
 previous_config_hash=""
 current_config_hash="`echo "$( yq r $config_file $CONFIG_PATH )" | $md5_cmd | awk '{print $1}'`"
+version_string=""
 config_has_changed=""
+
 echo "current config hash: ${current_config_hash}"
 
 if [[ -z "$REQUESTING_VERSION" || "$REQUESTING_VERSION" == "null" ]] && [[ "$INITIAL_VERSION" == "0.0.0" ]]; then
@@ -153,33 +156,53 @@ else
         base_version="$REQUESTING_VERSION"
     fi
 
-    major=""
-    if [[ $VERSION_PATTERN == *"m."* ]]; then
-        major="$( semverDetectMajorChange "${base_version}" "${current_version}" )"
-        echo "semverDetectMajorChange "${base_version}" "${current_version}": $major "
-    fi
-    minor=""
-    if [[ $VERSION_PATTERN == *".n."* ]]; then
-        minor="$( semverDetectMinorChange "${base_version}" "${current_version}" )"
-        echo "semverDetectMinorChange "${base_version}" "${current_version}": $minor "
-    fi
-    patch=""
-    if [[ $VERSION_PATTERN == *".p"* ]]; then
-        patch="$( semverDetectPatchChange "${base_version}" "${current_version}" )"
-        echo "semverDetectPatchChange "${base_version}" "${current_version}": $patch "
+    # if version pattern is "-", which means "please ignore me as a semantic version"
+    if [[ $VERSION_PATTERN == "-" ]]; then
+        # check wether the version, as a string, changed
+        if [[ ! "$base_version" == "$current_version" ]]; then
+            version_string="true"
+            echo "version_string=true"
+        else
+            # check the hash if needed
+            if [ -f $TMPDIR/semver-config-hash ]; then
+                previous_config_hash="`cat $TMPDIR/semver-config-hash`"
+            fi
+            echo "previous config hash: ${previous_config_hash}"
+            if [[ ! "$current_config_hash" == "$previous_config_hash" ]]; then
+                config_has_changed="true"
+                echo "config_has_changed=true"
+            fi
+        fi
+    else
+        major=""
+        if [[ $VERSION_PATTERN == *"m."* ]]; then
+            major="$( semverDetectMajorChange "${base_version}" "${current_version}" )"
+            echo "semverDetectMajorChange "${base_version}" "${current_version}": $major "
+        fi
+        minor=""
+        if [[ $VERSION_PATTERN == *".n."* ]]; then
+            minor="$( semverDetectMinorChange "${base_version}" "${current_version}" )"
+            echo "semverDetectMinorChange "${base_version}" "${current_version}": $minor "
+        fi
+        patch=""
+        if [[ $VERSION_PATTERN == *".p"* ]]; then
+            patch="$( semverDetectPatchChange "${base_version}" "${current_version}" )"
+            echo "semverDetectPatchChange "${base_version}" "${current_version}": $patch "
+        fi
+
+        # only when same versions need to check config change
+        if [[ "${base_version}" == "${current_version}" ]]; then
+            if [ -f $TMPDIR/semver-config-hash ]; then
+                previous_config_hash="`cat $TMPDIR/semver-config-hash`"
+            fi
+            echo "previous config hash: ${previous_config_hash}"
+            if [[ ! "$current_config_hash" == "$previous_config_hash" ]]; then
+                config_has_changed="true"
+                echo "config_has_changed=true"
+            fi
+        fi
     fi
 
-    # only when same versions need to check config change
-    if [[ "${base_version}" == "${current_version}" ]]; then
-        if [ -f $TMPDIR/semver-config-hash ]; then
-            previous_config_hash="`cat $TMPDIR/semver-config-hash`"
-        fi
-        echo "previous config hash: ${previous_config_hash}"
-        if [[ ! "$current_config_hash" == "$previous_config_hash" ]]; then
-            config_has_changed="true"
-            echo "config_has_changed=true"
-        fi
-    fi
 fi
 
 echo "$current_config_hash" > "$TMPDIR/semver-config-hash"
@@ -188,6 +211,7 @@ if [ "${first_check}" == "true" ] \
     || [ "${major}" == "true" ] \
     || [ "${minor}" == "true" ] \
     || [ "${patch}" == "true" ] \
+    || [ "${version_string}" == "true" ] \
     || [ "${config_has_changed}" == "true" ]; then
     # new version found
     echo "new version detected: ${current_version}"
