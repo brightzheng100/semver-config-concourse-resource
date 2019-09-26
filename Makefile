@@ -1,7 +1,7 @@
 all: test build push-release
 
 test:
-	bats tests/check.bats && bats tests/in.bats
+	bats tests/check.bats && bats tests/check-stemcell.bats && bats tests/in.bats && bats tests/in-stemcell.bats
 
 build:
 	docker build -t itstarting/semver-config-concourse-resource:test .
@@ -9,7 +9,7 @@ build:
 push-test:
 	docker push itstarting/semver-config-concourse-resource:test
 
-RELASE_VERSION = "1.0.0"
+RELASE_VERSION = "1.1.0"
 push-release:
 	docker tag itstarting/semver-config-concourse-resource:test itstarting/semver-config-concourse-resource:$(RELASE_VERSION)
 	docker push itstarting/semver-config-concourse-resource:$(RELASE_VERSION)

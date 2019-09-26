@@ -22,9 +22,9 @@ Major features:
 - [2019-09-10] Released v1.0.0: 
   - Fixed the content hash detection issue by adding hash as part of the version identifiers
   - Bumped yq to latest v2.4.0
-- [2019-09-24] Released v2.0.0: 
+- [2019-09-24] Released v1.1.0: 
   - Added new version pattern "`-`" to cover more version-based scenarios, where the version might not be strictly semantic compatible
-  - Refactored the code with more test cases
+  - Slightly refactored the code with more test cases
 
 
 ## The Config File Example
@@ -118,6 +118,7 @@ resource_types:
     type: docker-image
     source:
       repository: itstarting/semver-config-concourse-resource
+      tag: 1.1.0
 
 resources:
 - name: config
@@ -139,7 +140,8 @@ jobs:
   plan:
   - get: config
     params:
-      format: yaml     # Optional. Supported formats: `yaml`, `json`. Defaults to `yaml`
+      filename: my-lovely-config      # Optional. Defaults to `semver-config`
+      format: yaml                    # Optional. Supported formats: `yaml`, `json`. Defaults to `yaml`
     trigger: true
   ...
 ```
